@@ -21,12 +21,24 @@ async def on_message(message):
     await bot.process_commands(message)
 
 @bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, reason=None):
+    await member.ban(reason=reason)
+    await ctx.send(f'User {member} has been banned.')
+
+@bot.command()
 async def dm(message):
     await message.author.send("Alright. Here is your direct message.")
 
 @bot.command()
 async def echo(ctx, *, arg):
     await ctx.send(arg)
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, reason=None):
+    await member.kick(reason=reason)
+    await ctx.send(f'User {member} has been kicked.')
 
 @bot.command(pass_context=True)
 async def purge(ctx, amnt=5):
@@ -36,11 +48,25 @@ async def purge(ctx, amnt=5):
 async def source(ctx):
     await ctx.send("https://github.com/xarvveron/discord-bot")
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def unban(ctx, member):
+    banned_users = await ctx.guild.bans()
+    member_name, member_discriminator = member.split('#')
+
+    for ban_entry in banned_users:
+        user = ban_entry.user
+
+        if (user.name, user.discriminator) == (member_name, member_discriminator):
+            await ctx.guild.unban(user)
+            await ctx.send(f'User {member} has been unbanned.')
+            break
+
 @bot.group(name="help", invoke_without_command=True)
 async def help(ctx):
     help_embed = discord.Embed(title="Help", description="Use $help <command> for extended information.")
     help_embed.add_field(name="General", value="help, source")
-    help_embed.add_field(name="Moderation", value="purge")
+    help_embed.add_field(name="Moderation", value="ban, kick, purge, unban")
 
     await ctx.send(embed=help_embed)
 
@@ -55,7 +81,10 @@ async def general(ctx):
 @help.command(name="moderation")
 async def moderation(ctx):
     moderation_embed = discord.Embed(title="Moderation Commands", description="Use $help <command> for extended information.")
+    moderation_embed.add_field(name="Ban", value="Ban a user from the server.")
+    moderation_embed.add_field(name="Kick", value="Kick a user from the server.")
     moderation_embed.add_field(name="Purge", value="Clear messages from the channel you use this is.")
+    moderation_embed.add_field(name="Unban", value="Unban a user from the server.")
 
     await ctx.send(embed=moderation_embed)
 
