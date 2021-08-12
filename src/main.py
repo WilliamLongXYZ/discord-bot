@@ -24,6 +24,10 @@ async def on_message(message):
 async def dm(message):
     await message.author.send("Alright. Here is your direct message.")
 
+@bot.command()
+async def echo(ctx, arg):
+    await ctx.send(arg)
+
 @bot.command(pass_context=True)
 async def purge(ctx, amnt=5):
     await ctx.channel.purge(limit=amnt)
