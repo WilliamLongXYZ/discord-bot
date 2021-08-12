@@ -3,15 +3,24 @@
 import os
 
 import discord
+from discord.ext import commands
 from dotenv import load_dotenv
 
 
-client = discord.Client()
+bot = commands.Bot(command_prefix="$")
 
-@client.event
+@bot.event
 async def on_ready():
-    bot_channel = client.get_channel(875147778882412604)
+    bot_channel = bot.get_channel(875147778882412604)
     await bot_channel.send("Online.")
 
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+
+@bot.command()
+async def dm(message):
+    await message.author.send("Alright. Here is your direct message.")
+
 load_dotenv()
-client.run(os.getenv('TOKEN'))
+bot.run(os.getenv('TOKEN'))
