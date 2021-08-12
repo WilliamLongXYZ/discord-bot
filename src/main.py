@@ -36,5 +36,28 @@ async def purge(ctx, amnt=5):
 async def source(ctx):
     await ctx.send("https://github.com/xarvveron/discord-bot")
 
+@bot.group(name="help", invoke_without_command=True)
+async def help(ctx):
+    help_embed = discord.Embed(title="Help", description="Use $help <command> for extended information.")
+    help_embed.add_field(name="General", value="help, source")
+    help_embed.add_field(name="Moderation", value="purge")
+
+    await ctx.send(embed=help_embed)
+
+@help.command(name="general")
+async def general(ctx):
+    general_embed = discord.Embed(title="General Commands", description="Use $help <command for extended information.")
+    general_embed.add_field(name="help", value="Show information on all available commands.")
+    general_embed.add_field(name="source", value="Show a link to the source code of this bot.")
+    
+    await ctx.send(embed=general_embed)
+
+@help.command(name="moderation")
+async def moderation(ctx):
+    moderation_embed = discord.Embed(title="Moderation Commands", description="Use $help <command> for extended information.")
+    moderation_embed.add_field(name="Purge", value="Clear messages from the channel you use this is.")
+
+    await ctx.send(embed=moderation_embed)
+
 load_dotenv()
 bot.run(os.getenv('TOKEN'))
