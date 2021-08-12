@@ -28,9 +28,8 @@ async def dm(message):
     await message.author.send("Alright. Here is your direct message.")
 
 @bot.command()
-async def purge(message, amnt):
-    bot_channel = bot.get_channel(875147778882412604)
-    await bot_channel.purge(int(amnt))
+async def purge(ctx, amnt=5):
+    await ctx.channel.purge(limit=int(amnt))
 
 load_dotenv()
 bot.run(os.getenv('TOKEN'))
