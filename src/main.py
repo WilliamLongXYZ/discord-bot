@@ -12,6 +12,8 @@ bot = commands.Bot(command_prefix="$")
 @bot.event
 async def on_ready():
     bot_channel = bot.get_channel(875147778882412604)
+    await bot.change_presence(status=discord.Status.online)
+    await bot.change_presence(activity=discord.Game(name="FLOSS Simulator"))
     await bot_channel.send("Online.")
 
 @bot.event
