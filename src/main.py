@@ -18,18 +18,15 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    bot_channel = bot.get_channel(875147778882412604)
-    if message.content == f"<@!{bot.user.id}>, are you a bot?":
-        await bot_channel.send(f"Yes, <@!{message.author.id}>, I am a bot.")
     await bot.process_commands(message)
 
 @bot.command()
 async def dm(message):
     await message.author.send("Alright. Here is your direct message.")
 
-@bot.command()
+@bot.command(pass_context=True)
 async def purge(ctx, amnt=5):
-    await ctx.channel.purge(limit=int(amnt))
+    await ctx.channel.purge(limit=amnt)
 
 load_dotenv()
 bot.run(os.getenv('TOKEN'))
