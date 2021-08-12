@@ -32,5 +32,9 @@ async def echo(ctx, *, arg):
 async def purge(ctx, amnt=5):
     await ctx.channel.purge(limit=amnt)
 
+@bot.command()
+async def source(ctx):
+    await ctx.send("https://github.com/xarvveron/discord-bot")
+
 load_dotenv()
 bot.run(os.getenv('TOKEN'))
