@@ -6,8 +6,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-
-bot = commands.Bot(command_prefix="$", help_command=None)
+prefix = '$'
+bot = commands.Bot(command_prefix=prefix, help_command=None)
 
 @bot.event
 async def on_ready():
@@ -62,22 +62,54 @@ async def unban(ctx, member):
             await ctx.send(f'User {member} has been unbanned.')
             return
 
-@bot.command()
-async def channel_add(ctx, channel_name):
-    await ctx.guild.create_text_channel(channel_name)
-    await ctx.send(f"A new channel called {channel_name} was made")
+@bot.group(name="channel", invoke_without_command=True)
+async def channel(ctx):
+    await ctx.send(f'Use `{prefix}help channel` for more usage information.')
+
+@channel.command(name="create")
+async def create(ctx, name):
+    await ctx.guild.create_text_channel(name)
+    for channel in ctx.guild.channels:
+        if channel.name == name:
+            id = channel.id
+    await ctx.send(f'The channel <#{id}> has been created.')
+
+@channel.command(name="delete")
+async def delete(ctx, channel: discord.TextChannel):
+    await channel.delete()
+
+@channel.command(name="purge")
+async def purge(ctx):
+    for channel in ctx.guild.channels:
+        await channel.delete()
+
+@channel.command(name="query")
+async def query(ctx):
+    channels = bot.get_all_channels()
+    channel_str = ''
+    for channel in channels:
+        channel_str += str(channel)+'\n'
+    await ctx.send(channel_str)
+
+@channel.command(name="wipe")
+async def wipe(ctx, name):
+    for channel in ctx.guild.channels:
+        if channel.name == name:
+            await channel.delete()
 
 @bot.group(name="help", invoke_without_command=True)
 async def help(ctx):
     help_embed = discord.Embed(title="Help", description="Use $help <command> for extended information.")
-    help_embed.add_field(name="General", value="help, source")
-    help_embed.add_field(name="Moderation", value="ban, kick, purge, unban")
+    help_embed.add_field(name="General", value="dm, echo, help, source")
+    help_embed.add_field(name="Moderation", value="ban, channel, kick, purge, unban")
 
     await ctx.send(embed=help_embed)
 
 @help.command(name="general")
 async def general(ctx):
     general_embed = discord.Embed(title="General Commands", description="Use $help <command for extended information.")
+    general_embed.add_field(name="dm", value="Receive a direct message from this bot.")
+    general_embed.add_field(name="echo", value="Repeat what the user inputs.")
     general_embed.add_field(name="help", value="Show information on all available commands.")
     general_embed.add_field(name="source", value="Show a link to the source code of this bot.")
     
@@ -86,10 +118,11 @@ async def general(ctx):
 @help.command(name="moderation")
 async def moderation(ctx):
     moderation_embed = discord.Embed(title="Moderation Commands", description="Use $help <command> for extended information.")
-    moderation_embed.add_field(name="Ban", value="Ban a user from the server.")
-    moderation_embed.add_field(name="Kick", value="Kick a user from the server.")
-    moderation_embed.add_field(name="Purge", value="Clear messages from the channel you use this is.")
-    moderation_embed.add_field(name="Unban", value="Unban a user from the server.")
+    moderation_embed.add_field(name="ban", value="Ban a user from the server.")
+    moderation_embed.add_field(name="channel", value="A collection of sub-commands to handle creation and editing of channels.")
+    moderation_embed.add_field(name="kick", value="Kick a user from the server.")
+    moderation_embed.add_field(name="purge", value="Clear messages from the channel you use this is.")
+    moderation_embed.add_field(name="unban", value="Unban a user from the server.")
 
     await ctx.send(embed=moderation_embed)
 
