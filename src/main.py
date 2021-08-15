@@ -60,7 +60,12 @@ async def unban(ctx, member):
         if (user.name, user.discriminator) == (member_name, member_discriminator):
             await ctx.guild.unban(user)
             await ctx.send(f'User {member} has been unbanned.')
-            break
+            return
+
+@bot.command()
+async def channel_add(ctx, channel_name):
+    await ctx.guild.create_text_channel(channel_name)
+    await ctx.send(f"A new channel called {channel_name} was made")
 
 @bot.group(name="help", invoke_without_command=True)
 async def help(ctx):
