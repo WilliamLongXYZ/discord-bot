@@ -5,6 +5,7 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import nacl.utils
 
 prefix = '$'
 bot = commands.Bot(command_prefix=prefix, help_command=None)
@@ -40,7 +41,7 @@ async def kick(ctx, member: discord.Member, reason=None):
     await member.kick(reason=reason)
     await ctx.send(f'User {member} has been kicked.')
 
-@bot.command(pass_context=True)
+@bot.command()
 async def purge(ctx, amnt=5):
     await ctx.channel.purge(limit=amnt)
 
@@ -78,6 +79,14 @@ async def create(ctx, name):
 async def delete(ctx, channel: discord.TextChannel):
     await channel.delete()
 
+@channel.command(name="list")
+async def list(ctx):
+    channels = ctx.guild.get_channels
+    channel_str = ''
+    for channel in channels:
+        channel_str += str(channel)+'\n'
+    await ctx.send(channel_str)
+
 @channel.command(name="purge")
 async def purge(ctx):
     for channel in ctx.guild.channels:
@@ -91,11 +100,37 @@ async def query(ctx):
         channel_str += str(channel)+'\n'
     await ctx.send(channel_str)
 
+@channel.command(name="textpurge")
+async def textpurge(ctx):
+    for channel in ctx.guild.text_channels:
+        await channel.delete()
+
 @channel.command(name="wipe")
 async def wipe(ctx, name):
     for channel in ctx.guild.channels:
         if channel.name == name:
             await channel.delete()
+
+@bot.group(name="voice", invoke_without_command=True)
+async def voice(ctx):
+    await ctx.send(f'Use `{prefix}help channel voice` for more usage information.')
+
+@voice.group(name="create")
+async def create(ctx, name):
+    await ctx.guild.create_voice_channel(name)
+    for channel in ctx.guild.channels:
+        if channel.name == name:
+            id = channel.id
+    await ctx.send(f'The channel <#{id}> has been created.')
+
+@voice.command()
+async def join(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+@voice.command()
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
 
 @bot.group(name="help", invoke_without_command=True)
 async def help(ctx):
