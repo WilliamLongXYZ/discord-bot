@@ -135,7 +135,7 @@ async def leave(ctx):
 @bot.group(name="help", invoke_without_command=True)
 async def help(ctx):
     help_embed = discord.Embed(title="Help", description="Use $help <command> for extended information.")
-    help_embed.add_field(name="General", value="dm, echo, help, source")
+    help_embed.add_field(name="General", value="dm, echo, help, source, voice")
     help_embed.add_field(name="Moderation", value="ban, channel, kick, purge, unban")
 
     await ctx.send(embed=help_embed)
@@ -147,6 +147,7 @@ async def general(ctx):
     general_embed.add_field(name="echo", value="Repeat what the user inputs.")
     general_embed.add_field(name="help", value="Show information on all available commands.")
     general_embed.add_field(name="source", value="Show a link to the source code of this bot.")
+    general_embed.add_field(name="voice", value="A collection of sub-commands to create, join, leave, and handle voice channels")
     
     await ctx.send(embed=general_embed)
 
