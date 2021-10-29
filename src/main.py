@@ -5,7 +5,10 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import asyncio
 import nacl.utils
+
+import youtube_dl
 
 prefix = '$'
 bot = commands.Bot(command_prefix=prefix, help_command=None)
@@ -34,6 +37,66 @@ async def dm(message):
 @bot.command()
 async def echo(ctx, *, arg):
     await ctx.send(arg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+@bot.command(name='join', help='Tells the bot to join the voice channel')
+async def join(ctx):
+    if not ctx.message.author.voice:
+        await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
+        return
+    else:
+        channel = ctx.message.author.voice.channel
+    await channel.connect()
+
+@bot.command(name='leave', help='To make the bot leave the voice channel')
+async def leave(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_connected():
+        await voice_client.disconnect()
+    else:
+        await ctx.send("The bot is not connected to a voice channel.")
+
+
+
+
+
+
+ytdl = youtube_dl.YoutubeDL()
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+        self.data = data
+        self.title = data.get('title')
+        self.url = ""
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+        filename = data['title'] if stream else ytdl.prepare_filename(data)
+        return filename
+
+@bot.command(name='play')
+async def play(ctx, url):
+    filename = await YTDLSource.from_url(url, loop=bot.loop)
+    ctx.message.guild.voice_client.play(discord.FFmpegPCMAudio(executable="E:/ffmpeg/bin/ffmpeg.exe", source=filename))
+    await ctx.send(f'Playing: {filename}')
+
+
 
 @bot.command()
 @commands.has_permissions(kick_members=True)
@@ -81,7 +144,7 @@ async def delete(ctx, channel: discord.TextChannel):
 
 @channel.command(name="list")
 async def list(ctx):
-    channels = ctx.guild.get_channels
+    channels = ctx.guild.text_channels
     channel_str = ''
     for channel in channels:
         channel_str += str(channel)+'\n'
@@ -113,7 +176,7 @@ async def wipe(ctx, name):
 
 @bot.group(name="voice", invoke_without_command=True)
 async def voice(ctx):
-    await ctx.send(f'Use `{prefix}help channel voice` for more usage information.')
+    await ctx.send(f'Use `{prefix}help voice` for more usage information.')
 
 @voice.group(name="create")
 async def create(ctx, name):
@@ -127,6 +190,8 @@ async def create(ctx, name):
 async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
+
+
 
 @voice.command()
 async def leave(ctx):
